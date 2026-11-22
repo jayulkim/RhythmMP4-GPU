@@ -7,10 +7,10 @@ plugins {
 }
 
 // TODO: Update value to your plugin's name.
-val pluginName = "GDExtensionAndroidPluginTemplate"
+val pluginName = "RhythmMP4GPU"
 
 // TODO: Update value to match your plugin's package name.
-val pluginPackageName = "org.godotengine.plugin.android.gdextension.template"
+val pluginPackageName = "com.rhythmstudio.mp4gpu"
 
 android {
     namespace = pluginPackageName
