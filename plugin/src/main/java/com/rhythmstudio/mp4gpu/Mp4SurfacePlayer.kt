@@ -4,6 +4,7 @@ import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.util.Log
 import android.view.Surface
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal class Mp4SurfacePlayer {
 
@@ -14,6 +15,8 @@ internal class Mp4SurfacePlayer {
     private var player: MediaPlayer? = null
     private var videoSurface: Surface? = null
     private var videoTexture: SurfaceTexture? = null
+
+    private val frameReady = AtomicBoolean(false)
 
     fun open(
         filePath: String,
@@ -34,6 +37,10 @@ internal class Mp4SurfacePlayer {
                     width.coerceAtLeast(1),
                     height.coerceAtLeast(1)
                 )
+
+                setOnFrameAvailableListener {
+                    frameReady.set(true)
+                }
             }
 
             videoSurface = Surface(videoTexture)
@@ -65,6 +72,22 @@ internal class Mp4SurfacePlayer {
         }
     }
 
+    fun updateFrameOnRenderThread(): Boolean {
+        val texture = videoTexture ?: return false
+
+        if (!frameReady.getAndSet(false)) {
+            return false
+        }
+
+        return try {
+            texture.updateTexImage()
+            true
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "MP4 texture update failed", e)
+            false
+        }
+    }
+
     fun getSurfaceTexture(): SurfaceTexture? {
         return videoTexture
     }
@@ -88,6 +111,8 @@ internal class Mp4SurfacePlayer {
     }
 
     fun close() {
+        frameReady.set(false)
+
         player?.let {
             try {
                 it.release()
@@ -96,8 +121,10 @@ internal class Mp4SurfacePlayer {
         }
 
         player = null
+
         videoSurface?.release()
         videoSurface = null
+
         videoTexture?.release()
         videoTexture = null
     }
