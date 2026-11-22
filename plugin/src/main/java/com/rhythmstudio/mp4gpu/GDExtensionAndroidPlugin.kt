@@ -50,6 +50,11 @@ class GDExtensionAndroidPlugin(
     }
 
     @UsedByGodot
+    fun updateMp4Frame(): Boolean {
+        return mp4Player.updateFrameOnRenderThread()
+    }
+
+    @UsedByGodot
     fun getPositionMs(): Int {
         return mp4Player.positionMs()
     }
