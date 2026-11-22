@@ -10,27 +10,21 @@ class GDExtensionAndroidPlugin(
 ) : GodotPlugin(godot) {
 
     companion object {
-        private val TAG =
-            GDExtensionAndroidPlugin::class.java.simpleName
+        private const val TAG = "RhythmMP4GPU"
 
         init {
             try {
-                Log.v(
-                    TAG,
-                    "Loading ${BuildConfig.GODOT_PLUGIN_NAME}"
-                )
                 System.loadLibrary(
                     BuildConfig.GODOT_PLUGIN_NAME
                 )
+                Log.i(TAG, "Native library loaded")
             } catch (e: UnsatisfiedLinkError) {
-                Log.e(
-                    TAG,
-                    "Unable to load native library",
-                    e
-                )
+                Log.e(TAG, "Native library error", e)
             }
         }
     }
+
+    private val mp4Player = Mp4SurfacePlayer()
 
     override fun getPluginName(): String =
         BuildConfig.GODOT_PLUGIN_NAME
@@ -39,6 +33,41 @@ class GDExtensionAndroidPlugin(
         setOf(
             "res://addons/${BuildConfig.GODOT_PLUGIN_NAME}/plugin.gdextension"
         )
+
+    @UsedByGodot
+    fun openMp4(
+        filePath: String,
+        textureId: Int,
+        width: Int,
+        height: Int
+    ): Boolean {
+        return mp4Player.open(
+            filePath,
+            textureId,
+            width,
+            height
+        )
+    }
+
+    @UsedByGodot
+    fun getPositionMs(): Int {
+        return mp4Player.positionMs()
+    }
+
+    @UsedByGodot
+    fun pauseMp4() {
+        mp4Player.pause()
+    }
+
+    @UsedByGodot
+    fun resumeMp4() {
+        mp4Player.resume()
+    }
+
+    @UsedByGodot
+    fun closeMp4() {
+        mp4Player.close()
+    }
 
     @UsedByGodot
     external fun helloWorld()
